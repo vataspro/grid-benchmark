@@ -96,7 +96,7 @@ mkdir -p build_cpu; cd build_cpu
              --enable-devel-headers --enable-examples --enable-optimizations   \
              --with-verbs --disable-logging --disable-debug                    \
              --disable-assertions --enable-mt --enable-cma                     \
-              --with-knem=/opt/knem-1.1.4.90mlnx3/--with-rdmacm                \
+             --with-knem=/opt/knem-1.1.4.90mlnx3/ --with-rdmacm                \
              --without-rocm --without-ugni --without-java                      \
              --enable-compiler-opt=3 --without-cm --without-ugni --with-rc     \
              --with-ud --with-dc --with-mlx5-dv --with-dm --enable-mt --without-go
