@@ -634,7 +634,7 @@ class Benchmark
 
     ///////// Welcome message ////////////
     grid_big_sep();
-    std::cout << GridLogMessage << "Benchmark DWF on " << L << "^4 local volume "
+    std::cout << GridLogMessage << "Benchmark Sp4 Fundamental DWF on " << L << "^4 local volume "
               << std::endl;
     std::cout << GridLogMessage << "* Nc             : " << Nc << std::endl;
     std::cout << GridLogMessage
@@ -1045,28 +1045,15 @@ class Benchmark
     std::cout << GridLogMessage << "Initialised RNGs" << std::endl;
 
     // Sp4 
-    typedef Sp4FundWilsonImplD Action;
-    //typedef DomainWallFermion<Sp4FundWilsonImplD> Action;
+    typedef DomainWallFermion<Sp4FundWilsonImplD> Action;
     typedef typename Action::FermionField Fermion;
 
     // Define SU4 gauge field
-    //using iLorentzSU4Matrix = iVector<iScalar<iMatrix<Complex, 4> >, Nd>;
-    //typedef iLorentzSU4Matrix<vComplexF>  vLorentzSU4MatrixF;
-    //using vLorentzSU4MatrixF = iVector<iScalar<iMatrix<vComplexF, 4> >, Nd>;
-
-    // This works but can do it faster
-    //typedef iVector<iScalar<iMatrix<vComplexD, 4> >, Nd> vLorentzSU4MatrixD;
-    //typedef Lattice<vLorentzSU4MatrixD>   LatticeLorentzSU4MatrixD;
-    //typedef LatticeLorentzSU4MatrixD      LatticeSU4GaugeFieldD;
-    //typedef LatticeSU4GaugeFieldD Gauge;
-
     Lattice<iVector<iScalar<iMatrix<vComplexD,4>>,Nd>> Umu(UGrid);
 
     ///////// Source preparation ////////////
-   //Gauge Umu(UGrid);
     //Sp<Nc>::ProjectOnSpecialGroup(U);
     Sp<4>::HotConfiguration(RNG4, Umu);
-    //assert(is_element_of_sp2n_group(Umu));
     Fermion src(FGrid);
     random(RNG5, src);
     Fermion src_e(FrbGrid);
@@ -1075,13 +1062,12 @@ class Benchmark
     Fermion r_o(FrbGrid);
     Fermion r_eo(FGrid);
 
-    // Add M5 if/when DWF works
     Action Dw(Umu, *FGrid, *FrbGrid, *UGrid, *UrbGrid, mass, M5);
 
     {
 
-      //pickCheckerboard(Even, src_e, src);
-      //pickCheckerboard(Odd, src_o, src);
+      pickCheckerboard(Even, src_e, src);
+      pickCheckerboard(Odd, src_o, src);
 
       const int num_cases = 4;
       std::string fmt("G/S/C ; G/O/C ; G/S/S ; G/O/S ");
@@ -1212,6 +1198,7 @@ int main(int argc, char **argv)
   bool do_memory = true;
   bool do_comms = true;
   bool do_flops = true;
+  bool do_sp4_fund = true;
 
   // NOTE: these two take O((number of ranks)^2) time, which might be a lot, so they are
   // off by default
@@ -1236,6 +1223,9 @@ int main(int argc, char **argv)
       do_latency = true;
     if (arg == "--benchmark-p2p")
       do_p2p = true;
+    if (arg == "--benchmark-sp4-fund")
+      do_sp4_fund = true;
+
     if (arg == "--no-benchmark-su4")
       do_su4 = false;
     if (arg == "--no-benchmark-memory")
@@ -1248,6 +1238,8 @@ int main(int argc, char **argv)
       do_latency = false;
     if (arg == "--no-benchmark-p2p")
       do_p2p = false;
+    if (arg == "--no-benchmark-sp4-fund")
+      do_sp4_fund = false;
   }
 
   CartesianCommunicator::SetCommunicatorPolicy(
@@ -1262,7 +1254,8 @@ int main(int argc, char **argv)
   std::vector<double> wilson;
   std::vector<double> dwf4;
   std::vector<double> staggered;
-  std::vector<double> sp4_fund;
+  std::vector<double> sp4_wilson_fund;
+  std::vector<double> sp4_dwf_fund;
 
   if (do_memory)
   {
@@ -1314,6 +1307,16 @@ int main(int argc, char **argv)
       wilson.push_back(Benchmark::DWF(Ls, L_list[l]));
     }
 
+    if (do_sp4_fund)
+    {
+      grid_big_sep();
+      std::cout << GridLogMessage << " Wilson dslash 4D vectorised" << std::endl;
+      for (int l = 0; l < L_list.size(); l++)
+      {
+        sp4_wilson_fund.push_back(Benchmark::Sp4_FUND(Ls, L_list[l]));
+      }
+    }
+
     Ls = 12;
     grid_big_sep();
     std::cout << GridLogMessage << " Domain wall dslash 4D vectorised" << std::endl;
@@ -1321,6 +1324,16 @@ int main(int argc, char **argv)
     {
       double result = Benchmark::DWF(Ls, L_list[l]);
       dwf4.push_back(result);
+    }
+
+    if (do_sp4_fund)
+    {
+      grid_big_sep();
+      std::cout << GridLogMessage << " Wilson dslash 4D vectorised" << std::endl;
+      for (int l = 0; l < L_list.size(); l++)
+      {
+        sp4_dwf_fund.push_back(Benchmark::Sp4_FUND(Ls, L_list[l]));
+      }
     }
 
     grid_big_sep();
