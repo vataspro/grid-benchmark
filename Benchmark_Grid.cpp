@@ -1417,6 +1417,10 @@ int main(int argc, char **argv)
   bool do_comms = true;
   bool do_flops = true;
 
+  bool do_sp4_wilson = true;
+  bool do_sp4_dwf = true;
+  bool do_sp4_2as = true;
+
   // NOTE: these two take O((number of ranks)^2) time, which might be a lot, so they are
   // off by default
   bool do_latency = false;
@@ -1440,6 +1444,13 @@ int main(int argc, char **argv)
       do_latency = true;
     if (arg == "--benchmark-p2p")
       do_p2p = true;
+    if (arg == "--benchmark-sp4-wilson")
+      do_sp4_wilson = true;
+    if (arg == "--benchmark-sp4-dwf")
+      do_sp4_dwf = true;
+    if (args == "--benchmark-sp4-2as")
+      do_sp4_2as = true;
+
     if (arg == "--no-benchmark-su4")
       do_su4 = false;
     if (arg == "--no-benchmark-memory")
@@ -1452,6 +1463,12 @@ int main(int argc, char **argv)
       do_latency = false;
     if (arg == "--no-benchmark-p2p")
       do_p2p = false;
+    if (arg == "--no-benchmark-sp4-wilson")
+      do_sp4_wilson = false;
+    if (arg == "--no-benchmark-sp4-dwf")
+      do_sp4_dwf = false;
+    if (args == "--no-benchmark-sp4-2as")
+      do_sp4_2as = false;
   }
 
   CartesianCommunicator::SetCommunicatorPolicy(
@@ -1466,6 +1483,10 @@ int main(int argc, char **argv)
   std::vector<double> wilson;
   std::vector<double> dwf4;
   std::vector<double> staggered;
+
+  std::vector<double> sp4_wilson;
+  std::vector<double> sp4_dwf;
+  std::vector<double> sp4_wilson_2AS;
 
   if (do_memory)
   {
@@ -1534,6 +1555,44 @@ int main(int argc, char **argv)
       double result = Benchmark::Staggered(L_list[l]);
       staggered.push_back(result);
     }
+
+    // Start Sp(4) Benchmarks
+    // Sp(4) Wilson Fermions
+    if (do_sp4_wilson)
+    {
+      Ls = 1;
+      grid_big_sep();
+      std::cout << GridLogMessage << " Sp(4) Wilson dslash 4D vectorised" << std::endl;
+      for (int l = 0; l < L_list.size(); l++)
+      {
+        double result = Benchmark::Sp4DWF(Ls, L_list[l]);
+        sp4_wilson.push_back(result);
+      }
+    }
+    // Sp(4) Domain Wall Fermions
+    if (do_sp4_dwf)
+    {
+      Ls = 12;
+      grid_big_sep();
+      std::cout << GridLogMessage << " Domain wall dslash 4D vectorised" << std::endl;
+      for (int l = 0; l < L_list.size(); l++)
+      {
+        double result = Benchmark::Sp4DWF(Ls, L_list[l]);
+        sp4_dwf.push_back(result);
+      }
+    }
+
+    // Sp(4) two index antisymmetric action kernel benchmark
+    if (do_sp4_2as)
+    {
+      grid_big_sep();
+      std::cout << GridLogMessage << " Sp(4) two index antisymmetric dslash 4D vectorized" << std::endl;
+      {
+        double result = Benchmark::Sp4WF_2AS(Ls, L_list[l]);
+        sp4_wilson_2AS.push_back(result);
+      }
+          
+        
 
     int NN = NN_global;
 
