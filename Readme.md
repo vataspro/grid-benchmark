@@ -12,7 +12,7 @@ performed for a fixed range of problem sizes.
 Build and install Grid, all dependencies, and the benchmark with
 ```bash
 ./bootstrap-env.sh <env_dir> <system>       # create benchmark environment
-./build-grid.sh <env_dir> <config>          # build Grid
+./build-grid.sh <env_dir> <config> <njobs>  # build Grid
 ./build-benchmark.sh <env_dir> <config>     # build benchmarks
 ```
 where `<env_dir>` is an arbitrary directory where every product will be stored, `<system>`
