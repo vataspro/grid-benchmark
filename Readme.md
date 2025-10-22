@@ -11,9 +11,9 @@ performed for a fixed range of problem sizes.
 ## TL;DR
 Build and install Grid, all dependencies, and the benchmark with
 ```bash
-./bootstrap-env.sh <env_dir> <system>       # create benchmark environment
-./build-grid.sh <env_dir> <config> <njobs>  # build Grid
-./build-benchmark.sh <env_dir> <config>     # build benchmarks
+./bootstrap-env.sh <env_dir> <system> <njobs>  # create benchmark environment
+./build-grid.sh <env_dir> <config> <njobs>     # build Grid
+./build-benchmark.sh <env_dir> <config>        # build benchmarks
 ```
 where `<env_dir>` is an arbitrary directory where every product will be stored, `<system>`
 is a sub-directory of `systems` containing system-specific configuration files 
