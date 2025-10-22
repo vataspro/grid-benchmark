@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Grid/Grid.h>
-//#include <Grid/Wilson/WilsonImpl.h>
+#include <Grid/qcd/action/fermion/WilsonImpl.h>
 
 NAMESPACE_BEGIN(Grid);
 
