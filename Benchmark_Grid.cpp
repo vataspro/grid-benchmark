@@ -23,7 +23,7 @@
 #include "json.hpp"
 #include "Instantiation/Sp4Fund/Implementation.hpp"
 #include <Grid/Grid.h>
-//#include <Grid/qcd/action/fermion/DomainWallFermion.h>
+#include <Grid/qcd/action/fermion/DomainWallFermion.h>
 
 using namespace Grid;
 
@@ -542,7 +542,7 @@ class Benchmark
   static void SU4(void)
   {
     const int Nc4 = 4;
-    typedef Lattice<iMatrix<vComplexF, Nc4>> LatticeSU4;
+    typedef Lattice<iMatrix<vComplexF, 4>> LatticeSU4;
 
     Coordinate simd_layout = GridDefaultSimd(Nd, vComplexF::Nsimd());
     Coordinate mpi_layout = GridDefaultMpi();
@@ -984,11 +984,14 @@ class Benchmark
     return gflops_best;
   }
 
-  // Benchmark Sp4 DWF fundamental represantation 
-  static double Sp4_FUND(int Ls, int L)
+  // Benchmark Sp4 DWF fundamental represantation
+  // TODO: FIX Impl type from D to F!
+  static double Sp4_Fund(int Ls, int L)
   {
     RealD mass = 0.1;
     RealD M5 = 1.8;
+
+    int Nc4 = 4;
 
     double gflops;
     double gflops_best = 0;
@@ -1016,7 +1019,7 @@ class Benchmark
     grid_big_sep();
     std::cout << GridLogMessage << "Benchmark Sp4 DWF on " << L << "^4 local volume "
               << std::endl;
-    std::cout << GridLogMessage << "* Nc             : " << Nc << std::endl;
+    std::cout << GridLogMessage << "* Nc             : " << Nc4 << std::endl;
     std::cout << GridLogMessage
               << "* Global volume  : " << GridCmdVectorIntToString(latt4) << std::endl;
     std::cout << GridLogMessage << "* Ls             : " << Ls << std::endl;
@@ -1132,7 +1135,6 @@ class Benchmark
         // 1344 / 2 = 672
         // 672 = Nc* (6+(Nc-1)*8)*2*Nd + Nd*Nc*2*2  + Nd*Nc*Ns*2
         //	double flops=(1344.0*volume)/2;
-          int Nc4 = 4;
 #if 0
 	double fps = Nc4* (6+(Nc4-1)*8)*Ns*Nd + Nd*Nc4*Ns  + Nd*Nc4*Ns*2;
 #else
@@ -1310,10 +1312,10 @@ int main(int argc, char **argv)
     if (do_sp4_fund)
     {
       grid_big_sep();
-      std::cout << GridLogMessage << " Wilson dslash 4D vectorised" << std::endl;
+      std::cout << GridLogMessage << " Sp4 Fund Wilson dslash 4D vectorised" << std::endl;
       for (int l = 0; l < L_list.size(); l++)
       {
-        sp4_wilson_fund.push_back(Benchmark::Sp4_FUND(Ls, L_list[l]));
+        sp4_wilson_fund.push_back(Benchmark::Sp4_Fund(Ls, L_list[l]));
       }
     }
 
@@ -1329,11 +1331,14 @@ int main(int argc, char **argv)
     if (do_sp4_fund)
     {
       grid_big_sep();
-      std::cout << GridLogMessage << " Wilson dslash 4D vectorised" << std::endl;
-      for (int l = 0; l < L_list.size(); l++)
+      std::cout << GridLogMessage << " Sp4 Fund Domain wall dslash 4D vectorised" << std::endl;
+      // 32 has memory size issues, so .size() - 1
+      for (int l = 0; l < L_list.size() - 1; l++)
       {
-        sp4_dwf_fund.push_back(Benchmark::Sp4_FUND(Ls, L_list[l]));
+        sp4_dwf_fund.push_back(Benchmark::Sp4_Fund(Ls, L_list[l]));
       }
+      // remove line below if memory issue gets fixed
+      sp4_dwf_fund.push_back(
     }
 
     grid_big_sep();
@@ -1362,6 +1367,8 @@ int main(int argc, char **argv)
       tmp["Gflops_wilson"] = wilson[l] / NN;
       tmp["Gflops_dwf4"] = dwf4[l] / NN;
       tmp["Gflops_staggered"] = staggered[l] / NN;
+      tmp["Gflops_sp4_wilson_fund"] = sp4_wilson_fund[l] / NN;
+      tmp["Gflops_sp4_dwf_fund"] = sp4_dwf_fund[l] / NN;
       tmp_flops["results"].push_back(tmp);
     }
     grid_big_sep();
