@@ -5,5 +5,6 @@
 NAMESPACE_BEGIN(Grid);
 
 template class WilsonFermion5D<Sp4FundWilsonImplD>; 
+template class WilsonFermion5D<Sp4FundWilsonImplF>;
 
 NAMESPACE_END(Grid);

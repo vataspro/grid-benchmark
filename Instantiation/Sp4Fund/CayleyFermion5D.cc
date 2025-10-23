@@ -32,6 +32,8 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #include "Implementation.hpp"
 
 NAMESPACE_BEGIN(Grid);
+
 template class CayleyFermion5D<Sp4FundWilsonImplD>;
+template class CayleyFermion5D<Sp4FundWilsonImplF>;
 
 NAMESPACE_END(Grid);

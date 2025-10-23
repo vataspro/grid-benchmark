@@ -49,5 +49,6 @@ directory
 NAMESPACE_BEGIN(Grid);
 
 template class WilsonKernels<Sp4FundWilsonImplD>;
+template class WilsonKernels<Sp4FundWilsonImplF>;
 
 NAMESPACE_END(Grid);
