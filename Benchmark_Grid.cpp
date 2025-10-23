@@ -986,13 +986,13 @@ class Benchmark
   }
 
   // Benchmark Sp4 DWF fundamental represantation
-  // TODO: FIX Impl type from D to F!
+  // Currently only benchmarking single precision
   static double Sp4_Fund(int Ls, int L)
   {
     RealD mass = 0.1;
     RealD M5 = 1.8;
 
-    int Nc4 = 4;
+    const int Nc4 = 4;
 
     double gflops;
     double gflops_best = 0;
@@ -1034,7 +1034,7 @@ class Benchmark
 
     ///////// Lattice Init ////////////
     GridCartesian *UGrid = SpaceTimeGrid::makeFourDimGrid(
-        latt4, GridDefaultSimd(Nd, vComplexD::Nsimd()), GridDefaultMpi());
+        latt4, GridDefaultSimd(Nd, vComplexF::Nsimd()), GridDefaultMpi());
     GridRedBlackCartesian *UrbGrid = SpaceTimeGrid::makeFourDimRedBlackGrid(UGrid);
     GridCartesian *FGrid = SpaceTimeGrid::makeFiveDimGrid(Ls, UGrid);
     GridRedBlackCartesian *FrbGrid = SpaceTimeGrid::makeFiveDimRedBlackGrid(Ls, UGrid);
@@ -1049,11 +1049,11 @@ class Benchmark
     std::cout << GridLogMessage << "Initialised RNGs" << std::endl;
 
     // Sp4 
-    typedef DomainWallFermion<Sp4FundWilsonImplD> Action;
+    typedef DomainWallFermion<Sp4FundWilsonImplF> Action;
     typedef typename Action::FermionField Fermion;
 
     // Define SU4 gauge field
-    Lattice<iVector<iScalar<iMatrix<vComplexD,4>>,Nd>> Umu(UGrid);
+    Lattice<iVector<iScalar<iMatrix<vComplexF,4>>,Nd>> Umu(UGrid);
 
     ///////// Source preparation ////////////
     //Sp<Nc>::ProjectOnSpecialGroup(U);
@@ -1136,12 +1136,10 @@ class Benchmark
         // 1344 / 2 = 672
         // 672 = Nc* (6+(Nc-1)*8)*2*Nd + Nd*Nc*2*2  + Nd*Nc*Ns*2
         //	double flops=(1344.0*volume)/2;
-#if 0
-	double fps = Nc4* (6+(Nc4-1)*8)*Ns*Nd + Nd*Nc4*Ns  + Nd*Nc4*Ns*2;
-#else
+
         double fps =
             Nc4 * (6 + (Nc4 - 1) * 8) * Ns * Nd + 2 * Nd * Nc4 * Ns + 2 * Nd * Nc4 * Ns * 2; 
-#endif
+
         double flops = (fps * volume) / 2.;
         double gf_hi, gf_lo, gf_err;
 
@@ -1346,18 +1344,17 @@ class Benchmark
         // 1344 / 2 = 672
         // 672 = Nc* (6+(Nc-1)*8)*2*Nd + Nd*Nc*2*2  + Nd*Nc*Ns*2
         //	double flops=(1344.0*volume)/2;
-#if 0
-	double fps = Nc* (6+(Nc-1)*8)*Ns*Nd + Nd*Nc*Ns  + Nd*Nc*Ns*2;
-#else
+        // In the TwoIndexAntiSymmetric case we have Nc=5
+        const int Nc5 = 5;
         double fps =
-            Nc * (6 + (Nc - 1) * 8) * Ns * Nd + 2 * Nd * Nc * Ns + 2 * Nd * Nc * Ns * 2; 
+            Nc5 * (6 + (Nc5 - 1) * 8) * Ns * Nd + 2 * Nd * Nc5 * Ns + 2 * Nd * Nc5 * Ns * 2; 
             // first term = matvec flops (ignoring half projector trick, which halves)
             // ( 2 * Nd ) * Nc * (3 + (Nc-1) * 4) * 2, last two comes from 2 projectors per U.
             // num neighbs * Nc * (6*Nc + 2*(Nc-1)) * 2
             //                    (8*Nc-2) == 8*(Nc-1) + 6
             // second term: mass term 
             // Nc * Ns terms ~ 12
-#endif
+
         double flops = (fps * volume) / 2.;
         double gf_hi, gf_lo, gf_err;
 
