@@ -32,6 +32,42 @@ int NN_global;
 
 nlohmann::json json_results;
 
+
+void Sp4_Fund_to_TwoIndexAntiSym(Lattice<iVector<iScalar<iMatrix<vComplexF, 5>>, 4>> &Uas,
+                                  const Lattice<iVector<iScalar<iMatrix<vComplexF,4>>,Nd>> &Uin) {
+  std::cout << GridLogDebug << "Updating TwoIndex representation\n";
+  // Uas is in the TwoIndex antisymmetric representation
+  // Uin is in the fundamental representation
+  // get the U in TwoIndexRep
+  // (U)_{(ij)(lk)} = tr [ adj(e^(ij)) U e^(lk) transpose(U) ]
+  conformable(Uas, Uin);
+  Uas = Zero();
+  Lattice<iVector<iScalar<iMatrix<vComplexF, 5>>, 4>> tmp(Uin.Grid());
+
+  const int Dimension = GaugeGroupTwoIndex<4,AntiSymmetric,GroupName::Sp>::Dimension;
+  std::vector<typename GaugeGroup<4, GroupName::Sp>::MatrixF> eij(Dimension);
+
+  for (int a = 0; a < Dimension; a++)
+    GaugeGroupTwoIndex<4, AntiSymmetric, GroupName::Sp>::base(a, eij[a]);
+
+  for (int mu = 0; mu < Nd; mu++) {
+    auto Uin_mu = peekLorentz(Uin, mu);
+    auto U_mu = peekLorentz(Uas, mu);
+    for (int a = 0; a < Dimension; a++) {
+      //tmp = transpose(Uin_mu) * adj(eij[a]) * Uin_mu;
+      // I think we want a 4x4 matrix 5 times???
+      auto transp = transpose(Uin_mu); // 4x4
+      auto adj_ = adj(eij[a]); // 5x5??
+      tmp = transp * adj_;
+      tmp = tmp * Uin_mu;
+      for (int b = 0; b < Dimension; b++) {
+        pokeColour(U_mu, trace(tmp * eij[b]), a, b);
+      }
+    }
+    pokeLorentz(Uas, U_mu, mu);
+  }
+}
+
 // NOTE: Grid::GridClock is just a typedef to
 // `std::chrono::high_resolution_clock`, but `Grid::usecond` rounds to
 // microseconds (no idea why, probably wasnt ever relevant before), so we need
@@ -1250,22 +1286,25 @@ class Benchmark
 
 
     // Sp4 
-    //typedef DomainWallFermion<Sp4FundWilsonImplD> Action;
-    //typedef typename Action::FermionField Fermion;
-
     // Define SU4 gauge field
-    //Lattice<iVector<iScalar<iMatrix<vComplexD,4>>,Nd>> Umu(UGrid);
+    Lattice<iVector<iScalar<iMatrix<vComplexF,4>>,Nd>> Umu_fund(UGrid);
 
     ///////// Set Action ////////////
     typedef DomainWallFermion<Sp4TwoIndexAntiSymmetricWilsonImplF> Action;
     typedef typename Action::FermionField Fermion;
+
+    // Define SU4 gauge field
     typename Action::GaugeField Umu(UGrid);
-    // TODO! HotConfiguration!!
-    //SpTwoIndexAntiSymmetricRepresentation::LatticeField Umu(UGrid);
+    // HotConfiguration into fund
+    Sp<4>::HotConfiguration(RNG4, Umu_fund);
+    // Get Umu_fund -> Umu
+    typedef TwoIndexRep<4, AntiSymmetric, GroupName::Sp> Sp4TwoIndexAntiSymmetricRepresentation;
+    Sp4TwoIndexAntiSymmetricRepresentation TheTwoAntiSymRep(UGrid);
+
+    Sp4_Fund_to_TwoIndexAntiSym(Umu, Umu_fund);
 
     ///////// Source preparation ////////////
-    //Gauge Umu(UGrid);
-    //Sp<4>::HotConfiguration(RNG4, Umu);
+
     Fermion src(FGrid);
     random(RNG5, src);
     Fermion src_e(FrbGrid);
