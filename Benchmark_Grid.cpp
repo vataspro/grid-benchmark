@@ -33,8 +33,8 @@ int NN_global;
 nlohmann::json json_results;
 
 
-void Sp4_Fund_to_TwoIndexAntiSym(Lattice<iVector<iScalar<iMatrix<vComplexF, 5>>, 4>> &Uas,
-                                  const Lattice<iVector<iScalar<iMatrix<vComplexF,4>>,Nd>> &Uin) {
+void Sp4_Fund_to_TwoIndexAntiSym(Lattice<iVector<iScalar<iMatrix<vComplexD, 5>>, 4>> &Uas,
+                                 const Lattice<iVector<iScalar<iMatrix<vComplexD,4>>,Nd>> &Uin) {
   std::cout << GridLogDebug << "Updating TwoIndex representation\n";
   // Uas is in the TwoIndex antisymmetric representation
   // Uin is in the fundamental representation
@@ -42,10 +42,11 @@ void Sp4_Fund_to_TwoIndexAntiSym(Lattice<iVector<iScalar<iMatrix<vComplexF, 5>>,
   // (U)_{(ij)(lk)} = tr [ adj(e^(ij)) U e^(lk) transpose(U) ]
   conformable(Uas, Uin);
   Uas = Zero();
-  Lattice<iVector<iScalar<iMatrix<vComplexF, 5>>, 4>> tmp(Uin.Grid());
+
+  Lattice<iScalar<iScalar<iMatrix<vComplexD, 4>>>> tmp(Uin.Grid());
 
   const int Dimension = GaugeGroupTwoIndex<4,AntiSymmetric,GroupName::Sp>::Dimension;
-  std::vector<typename GaugeGroup<4, GroupName::Sp>::MatrixF> eij(Dimension);
+  std::vector<typename GaugeGroup<4, GroupName::Sp>::MatrixD> eij(Dimension);
 
   for (int a = 0; a < Dimension; a++)
     GaugeGroupTwoIndex<4, AntiSymmetric, GroupName::Sp>::base(a, eij[a]);
@@ -54,12 +55,7 @@ void Sp4_Fund_to_TwoIndexAntiSym(Lattice<iVector<iScalar<iMatrix<vComplexF, 5>>,
     auto Uin_mu = peekLorentz(Uin, mu);
     auto U_mu = peekLorentz(Uas, mu);
     for (int a = 0; a < Dimension; a++) {
-      //tmp = transpose(Uin_mu) * adj(eij[a]) * Uin_mu;
-      // I think we want a 4x4 matrix 5 times???
-      auto transp = transpose(Uin_mu); // 4x4
-      auto adj_ = adj(eij[a]); // 5x5??
-      tmp = transp * adj_;
-      tmp = tmp * Uin_mu;
+      tmp = transpose(Uin_mu) * adj(eij[a]) * Uin_mu;
       for (int b = 0; b < Dimension; b++) {
         pokeColour(U_mu, trace(tmp * eij[b]), a, b);
       }
@@ -1070,7 +1066,7 @@ class Benchmark
 
     ///////// Lattice Init ////////////
     GridCartesian *UGrid = SpaceTimeGrid::makeFourDimGrid(
-        latt4, GridDefaultSimd(Nd, vComplexF::Nsimd()), GridDefaultMpi());
+        latt4, GridDefaultSimd(Nd, vComplexD::Nsimd()), GridDefaultMpi());
     GridRedBlackCartesian *UrbGrid = SpaceTimeGrid::makeFourDimRedBlackGrid(UGrid);
     GridCartesian *FGrid = SpaceTimeGrid::makeFiveDimGrid(Ls, UGrid);
     GridRedBlackCartesian *FrbGrid = SpaceTimeGrid::makeFiveDimRedBlackGrid(Ls, UGrid);
@@ -1085,11 +1081,11 @@ class Benchmark
     std::cout << GridLogMessage << "Initialised RNGs" << std::endl;
 
     // Sp4 
-    typedef DomainWallFermion<Sp4FundWilsonImplF> Action;
+    typedef DomainWallFermion<Sp4FundWilsonImplD> Action;
     typedef typename Action::FermionField Fermion;
 
     // Define SU4 gauge field
-    Lattice<iVector<iScalar<iMatrix<vComplexF,4>>,Nd>> Umu(UGrid);
+    Lattice<iVector<iScalar<iMatrix<vComplexD,4>>,Nd>> Umu(UGrid);
 
     ///////// Source preparation ////////////
     //Sp<Nc>::ProjectOnSpecialGroup(U);
@@ -1246,17 +1242,18 @@ class Benchmark
         {local[0] * mpi[0], local[1] * mpi[1], local[2] * mpi[2], local[3] * mpi[3]});
 
     GridCartesian *TmpGrid = SpaceTimeGrid::makeFourDimGrid(
-        latt4, GridDefaultSimd(Nd, vComplex::Nsimd()), GridDefaultMpi());
+        latt4, GridDefaultSimd(Nd, vComplexD::Nsimd()), GridDefaultMpi());
     uint64_t NP = TmpGrid->RankCount();
     uint64_t NN = TmpGrid->NodeCount();
     NN_global = NN;
     uint64_t SHM = NP / NN;
 
     ///////// Welcome message ////////////
+    const int Nc4;
     grid_big_sep();
     std::cout << GridLogMessage << "Benchmark Sp4 2AS DWF on " << L << "^4 local volume "
               << std::endl;
-    std::cout << GridLogMessage << "* Nc             : " << Nc << std::endl;
+    std::cout << GridLogMessage << "* Nc             : " << Nc4 << std::endl;
     std::cout << GridLogMessage
               << "* Global volume  : " << GridCmdVectorIntToString(latt4) << std::endl;
     std::cout << GridLogMessage << "* Ls             : " << Ls << std::endl;
@@ -1270,7 +1267,7 @@ class Benchmark
 
     ///////// Lattice Init ////////////
     GridCartesian *UGrid = SpaceTimeGrid::makeFourDimGrid(
-        latt4, GridDefaultSimd(Nd, vComplexF::Nsimd()), GridDefaultMpi());
+        latt4, GridDefaultSimd(Nd, vComplexD::Nsimd()), GridDefaultMpi());
     GridRedBlackCartesian *UrbGrid = SpaceTimeGrid::makeFourDimRedBlackGrid(UGrid);
     GridCartesian *FGrid = SpaceTimeGrid::makeFiveDimGrid(Ls, UGrid);
     GridRedBlackCartesian *FrbGrid = SpaceTimeGrid::makeFiveDimRedBlackGrid(Ls, UGrid);
@@ -1287,10 +1284,10 @@ class Benchmark
 
     // Sp4 
     // Define SU4 gauge field
-    Lattice<iVector<iScalar<iMatrix<vComplexF,4>>,Nd>> Umu_fund(UGrid);
+    Lattice<iVector<iScalar<iMatrix<vComplexD,4>>,Nd>> Umu_fund(UGrid);
 
     ///////// Set Action ////////////
-    typedef DomainWallFermion<Sp4TwoIndexAntiSymmetricWilsonImplF> Action;
+    typedef DomainWallFermion<Sp4TwoIndexAntiSymmetricWilsonImplD> Action;
     typedef typename Action::FermionField Fermion;
 
     // Define SU4 gauge field
