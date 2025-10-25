@@ -35,6 +35,6 @@ directory
 
 NAMESPACE_BEGIN(Grid);
 
-template class WilsonFermion5D<Sp4TwoIndexAntiSymmetricWilsonImplD>; 
+template class WilsonFermion5D<Sp4TwoIndexAntiSymmetricWilsonImplF>;
 
 NAMESPACE_END(Grid);

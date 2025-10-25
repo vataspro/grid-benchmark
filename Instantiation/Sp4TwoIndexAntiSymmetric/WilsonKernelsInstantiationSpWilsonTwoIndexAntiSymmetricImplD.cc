@@ -48,7 +48,6 @@ directory
 NAMESPACE_BEGIN(Grid);
 
 template class WilsonKernels<Sp4TwoIndexAntiSymmetricWilsonImplD>;
-template class WilsonKernels<Sp4TwoIndexAntiSymmetricWilsonImplF>;
 
 
 NAMESPACE_END(Grid);

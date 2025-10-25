@@ -4,11 +4,12 @@ Grid physics library, www.github.com/paboyle/Grid
 
 Source file: ./lib/qcd/action/fermion/WilsonKernels.cc
 
-Copyright (C) 2015
+Copyright (C) 2015, 2020
 
 Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 Author: Peter Boyle <peterboyle@Peters-MacBook-Pro-2.local>
 Author: paboyle <paboyle@ph.ed.ac.uk>
+Author: Nils Meyer <nils.meyer@ur.de> Regensburg University
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,12 +30,24 @@ directory
 *************************************************************************************/
 /*  END LEGAL */
 #include <Grid/qcd/action/fermion/FermionCore.h>
-#include <Grid/qcd/action/fermion/implementation/WilsonFermion5DImplementation.h>
+#include <Grid/qcd/action/fermion/implementation/WilsonKernelsImplementation.h>
+#include <Grid/qcd/action/fermion/implementation/WilsonKernelsHandImplementation.h>
 #include "Implementation.hpp"
 
 
+#ifndef AVX512
+#ifndef QPX
+#ifndef A64FX
+#ifndef A64FXFIXEDSIZE
+#include <Grid/qcd/action/fermion/implementation/WilsonKernelsAsmImplementation.h>
+#endif
+#endif
+#endif
+#endif
+
 NAMESPACE_BEGIN(Grid);
 
-template class WilsonFermion5D<Sp4TwoIndexAntiSymmetricWilsonImplD>; 
+template class WilsonKernels<Sp4TwoIndexAntiSymmetricWilsonImplF>;
+
 
 NAMESPACE_END(Grid);
