@@ -1249,7 +1249,7 @@ class Benchmark
     uint64_t SHM = NP / NN;
 
     ///////// Welcome message ////////////
-    const int Nc4;
+    const int Nc4 = 4;
     grid_big_sep();
     std::cout << GridLogMessage << "Benchmark Sp4 2AS DWF on " << L << "^4 local volume "
               << std::endl;
