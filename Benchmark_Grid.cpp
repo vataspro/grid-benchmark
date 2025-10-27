@@ -667,7 +667,7 @@ class Benchmark
 
     ///////// Welcome message ////////////
     grid_big_sep();
-    std::cout << GridLogMessage << "Benchmark Sp4 Fundamental DWF on " << L << "^4 local volume "
+    std::cout << GridLogMessage << "Benchmark SU3 Fundamental DWF on " << L << "^4 local volume "
               << std::endl;
     std::cout << GridLogMessage << "* Nc             : " << Nc << std::endl;
     std::cout << GridLogMessage
@@ -1050,7 +1050,7 @@ class Benchmark
 
     ///////// Welcome message ////////////
     grid_big_sep();
-    std::cout << GridLogMessage << "Benchmark Sp4 DWF on " << L << "^4 local volume "
+    std::cout << GridLogMessage << "Benchmark Sp4 Fundamental DWF on " << L << "^4 local volume "
               << std::endl;
     std::cout << GridLogMessage << "* Nc             : " << Nc4 << std::endl;
     std::cout << GridLogMessage
