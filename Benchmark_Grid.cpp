@@ -1600,12 +1600,10 @@ int main(int argc, char **argv)
       grid_big_sep();
       std::cout << GridLogMessage << " Sp4 Fund Domain wall dslash 4D vectorised" << std::endl;
       // 32 has memory size issues, so .size() - 1
-      for (int l = 0; l < L_list.size() - 1; l++)
+      for (int l = 0; l < L_list.size(); l++)
       {
         sp4_dwf_fund.push_back(Benchmark::Sp4_Fund(Ls, L_list[l]));
       }
-      // remove line below if memory issue gets fixed
-      sp4_dwf_fund.push_back(0.);
     }
 
     if (do_sp4_2as)
@@ -1613,12 +1611,10 @@ int main(int argc, char **argv)
       grid_big_sep();
       std::cout << GridLogMessage << " Sp4 Fund Domain wall dslash 4D vectorised" << std::endl;
       // 32 has memory size issues, so .size() - 1
-      for (int l = 0; l < L_list.size() - 1; l++)
+      for (int l = 0; l < L_list.size(); l++)
       {
         sp4_dwf_2as.push_back(Benchmark::Sp4_2AS(Ls, L_list[l]));
       }
-      // remove line below if memory issue gets fixed
-      sp4_dwf_2as.push_back(0.);
     }
 
     grid_big_sep();
